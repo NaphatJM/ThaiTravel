@@ -1,14 +1,15 @@
 from fastapi import APIRouter
-from ttt.schemas.schema_user import User
-from typing import List, Optional
-from datetime import datetime
+from ttt.schemas.schema_user import User_schema
+from ttt.models import model_user
+from sqlmodel import Session
+from ttt.models import engine
 
 
 router = APIRouter(prefix="/users", tags=["User"])
 
 
 @router.get("/")
-async def get_users() -> List[User]:
+async def get_users():
     return [
         {
             "id": 1,
@@ -38,7 +39,7 @@ async def get_users() -> List[User]:
 
 
 @router.get("/{user_id}")
-async def get_user(user_id: int) -> User:
+async def get_user(user_id: int) -> User_schema:
     return {
         "id": 1,
         "full_name": "John Doe",
@@ -54,12 +55,18 @@ async def get_user(user_id: int) -> User:
 
 
 @router.post("/")
-async def create_user(user: User) -> User:
+async def create_user(user: User_schema) -> model_user.User:
+    print(f"Creating user: {user.model_dump()}")
+    db_user = model_user.User(**user.model_dump(exclude_unset=True))
+    with Session(engine) as session:
+        session.add(db_user)
+        session.commit()
+        session.refresh(db_user)
     return user
 
 
 @router.put("/{user_id}")
-async def update_user(user_id: int, user: User) -> User:
+async def update_user(user_id: int, user: User_schema) -> dict:
     return {"message": user, "user_id": user_id}
 
 

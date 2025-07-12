@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, create_engine, Session
 
 from .model_user import *
+from .model_activity import *
 
 engine = create_engine("sqlite:///database.db")
 session = Session(engine)
