@@ -8,4 +8,4 @@ class Activity(BaseModel):
     description: str
     location: str
     amount: decimal.Decimal
-    tax_return: decimal.Decimal
+    tax_return: decimal.Decimal | None = None

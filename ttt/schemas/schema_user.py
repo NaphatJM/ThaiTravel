@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-import datetime
 
 
 class User(BaseModel):
@@ -9,3 +8,4 @@ class User(BaseModel):
     email: str
     phone: str
     address: str
+    is_admin: bool = False
