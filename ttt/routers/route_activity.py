@@ -1,14 +1,14 @@
 from fastapi import APIRouter
-from ttt.schemas.schema_activity import Activity
+from ttt.schemas.schema_activity import Activity_schema
 from typing import List
 
 router = APIRouter(prefix="/activities", tags=["Activity"])
 
 
-@router.get("/", response_model=List[Activity])
+@router.get("/", response_model=List[Activity_schema])
 async def get_activities():
     return [
-        Activity(
+        Activity_schema(
             id=1,
             user_id=1,
             description="Description for Activity 1",
@@ -16,7 +16,7 @@ async def get_activities():
             amount=100,
             tax_return=10,
         ),
-        Activity(
+        Activity_schema(
             id=2,
             user_id=2,
             description="Description for Activity 2",
@@ -27,14 +27,14 @@ async def get_activities():
     ]
 
 
-@router.post("/", response_model=Activity)
-async def create_activity(activity: Activity):
+@router.post("/", response_model=Activity_schema)
+async def create_activity(activity: Activity_schema):
     return activity
 
 
-@router.get("/{activity_id}", response_model=Activity)
+@router.get("/{activity_id}", response_model=Activity_schema)
 async def get_activity(activity_id: int):
-    return Activity(
+    return Activity_schema(
         id=activity_id,
         user_id=1,
         description=f"Description for Activity {activity_id}",
@@ -44,8 +44,8 @@ async def get_activity(activity_id: int):
     )
 
 
-@router.put("/{activity_id}", response_model=Activity)
-async def update_activity(activity_id: int, activity: Activity):
+@router.put("/{activity_id}", response_model=Activity_schema)
+async def update_activity(activity_id: int, activity: Activity_schema):
     return activity
 
 

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 import decimal
 
 
-class Activity(BaseModel):
+class Activity_schema(BaseModel):
     id: int
     user_id: int
     description: str

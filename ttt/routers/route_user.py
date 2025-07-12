@@ -1,12 +1,12 @@
 from fastapi import APIRouter
-from ttt.schemas.schema_user import User
+from ttt.schemas.schema_user import User_schema
 from typing import List
 
 router = APIRouter(prefix="/users", tags=["User"])
 
 # Dummy in-memory storage for demonstration
 users_db = [
-    User(
+    User_schema(
         id=1,
         full_name="John Doe",
         citizen_id="1234567890123",
@@ -15,7 +15,7 @@ users_db = [
         address="123 Main St",
         is_admin=False,
     ),
-    User(
+    User_schema(
         id=2,
         full_name="Jane Smith",
         citizen_id="9876543210987",
@@ -24,7 +24,7 @@ users_db = [
         address="456 Second St",
         is_admin=False,
     ),
-    User(
+    User_schema(
         id=3,
         full_name="Admin User",
         citizen_id="1112223334445",
@@ -41,7 +41,7 @@ async def get_users():
     return users_db
 
 
-@router.get("/{user_id}", response_model=User)
+@router.get("/{user_id}", response_model=User_schema)
 async def get_user(user_id: int):
     for user in users_db:
         if user.id == user_id:
@@ -49,14 +49,14 @@ async def get_user(user_id: int):
     return {"error": "User not found"}
 
 
-@router.post("/", response_model=User)
-async def create_user(user: User):
+@router.post("/", response_model=User_schema)
+async def create_user(user: User_schema):
     users_db.append(user)
     return user
 
 
-@router.put("/{user_id}", response_model=User)
-async def update_user(user_id: int, user: User):
+@router.put("/{user_id}", response_model=User_schema)
+async def update_user(user_id: int, user: User_schema):
     for idx, u in enumerate(users_db):
         if u.id == user_id:
             users_db[idx] = user
