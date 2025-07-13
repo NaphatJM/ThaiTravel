@@ -1,75 +1,72 @@
-from fastapi import APIRouter
-from ttt.schemas.schema_user import User_schema
+from fastapi import APIRouter, HTTPException, status
+from sqlmodel import select
+from datetime import datetime
+from ttt.schemas import schema_user
 from ttt.models import model_user
-from sqlmodel import Session
-from ttt.models import engine
-
+from ttt import models
 
 router = APIRouter(prefix="/users", tags=["User"])
 
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK)
 async def get_users():
-    return [
-        {
-            "id": 1,
-            "full_name": "John Doe",
-            "thaiID": "1234567890123",
-            "email": "john@example.com",
-            "phone": "0812345678",
-            "address": "123 Main St",
-            "is_verified": True,
-            "is_admin": False,
-            "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00",
-        },
-        {
-            "id": 2,
-            "full_name": "Jane Smith",
-            "thaiID": "9876543210987",
-            "email": "jane@example.com",
-            "phone": "0823456789",
-            "address": "456 Elm St",
-            "is_verified": False,
-            "is_admin": True,
-            "created_at": "2024-01-02T00:00:00",
-            "updated_at": "2024-01-02T00:00:00",
-        },
-    ]
+    statement = select(model_user.User)
+    results = models.session.exec(statement)
+    db_users = results.all()
+    if not db_users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No users found"
+        )
+    return db_users
 
 
-@router.get("/{user_id}")
-async def get_user(user_id: int) -> User_schema:
-    return {
-        "id": 1,
-        "full_name": "John Doe",
-        "thaiID": "1234567890123",
-        "email": "john@example.com",
-        "phone": "0812345678",
-        "address": "123 Main St",
-        "is_verified": True,
-        "is_admin": False,
-        "created_at": "2024-01-01T00:00:00",
-        "updated_at": "2024-01-01T00:00:00",
-    }
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+async def get_user(user_id: int) -> model_user.User:
+    db_user = models.session.get(model_user.User, user_id)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {user_id} not found",
+        )
+    return db_user
 
 
-@router.post("/")
-async def create_user(user: User_schema) -> model_user.User:
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def create_user(user: schema_user.User_create_schema) -> model_user.User:
     print(f"Creating user: {user.model_dump()}")
     db_user = model_user.User(**user.model_dump(exclude_unset=True))
-    with Session(engine) as session:
-        session.add(db_user)
-        session.commit()
-        session.refresh(db_user)
-    return user
+    models.session.add(db_user)
+    models.session.commit()
+    models.session.refresh(db_user)
+    return db_user
 
 
-@router.put("/{user_id}")
-async def update_user(user_id: int, user: User_schema) -> dict:
-    return {"message": user, "user_id": user_id}
+@router.put("/{user_id}", status_code=status.HTTP_200_OK)
+async def update_user(
+    user_id: int, user: schema_user.User_update_schema
+) -> model_user.User:
+    statement = select(model_user.User).where(model_user.User.id == user_id)
+    results = models.session.exec(statement)
+    db_user = results.one()
+
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_data = user.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+    db_user.updated_at = datetime.now()
+    models.session.add(db_user)
+    models.session.commit()
+    models.session.refresh(db_user)
+    return db_user
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int):
+    statement = select(model_user.User).where(model_user.User.id == user_id)
+    results = models.session.exec(statement)
+    db_user = results.one()
+    models.session.delete(db_user)
+    models.session.commit()
     return {"message": "User deleted", "user_id": user_id}
