@@ -33,7 +33,6 @@ async def get_user(user_id: int) -> model_user.User:
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(user: schema_user.User_create_schema) -> model_user.User:
-    print(f"Creating user: {user.model_dump()}")
     db_user = model_user.User(**user.model_dump(exclude_unset=True))
     models.session.add(db_user)
     models.session.commit()
@@ -66,7 +65,12 @@ async def update_user(
 async def delete_user(user_id: int):
     statement = select(model_user.User).where(model_user.User.id == user_id)
     results = models.session.exec(statement)
-    db_user = results.one()
+    db_user = results.one_or_none()
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {user_id} not found",
+        )
     models.session.delete(db_user)
     models.session.commit()
     return {"message": "User deleted", "user_id": user_id}

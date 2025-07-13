@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import datetime
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 
-from .model_user import User
+
+if TYPE_CHECKING:
+    from .model_user import User
 
 
 class Activity(SQLModel, table=True):
@@ -12,6 +14,7 @@ class Activity(SQLModel, table=True):
     location: str
     amount: float
     tax_return: float | None = None
-    timestamp: datetime = Field(default_factory=datetime.now)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+
+    user: "User" = Relationship(back_populates="activities")

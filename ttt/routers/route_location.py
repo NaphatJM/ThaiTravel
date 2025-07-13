@@ -1,36 +1,70 @@
-from fastapi import APIRouter
-from ttt.schemas.schema_location import province_schema
-from typing import List
+from fastapi import APIRouter, HTTPException, status
+from ttt.schemas import schema_location
+from ttt.models import model_location
+from ttt import models
+from sqlmodel import select
 
 router = APIRouter(prefix="/locations", tags=["Location"])
 
 
 @router.get("/provinces")
 async def get_provinces():
-    return [
-        province_schema(id=1, name="Bangkok", code="BKK"),
-        province_schema(id=2, name="Chiang Mai", code="CM"),
-        province_schema(id=3, name="Phuket", code="PKT"),
-    ]
+    statement = select(model_location.Province)
+    results = models.session.exec(statement)
+    db_provinces = results.all()
+    if not db_provinces:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No provinces found"
+        )
+    return db_provinces
 
 
-@router.get("/provinces/{province_id}", response_model=province_schema)
-async def get_province(province_id: int):
-    return province_schema(
-        id=province_id, name=f"Province {province_id}", code=f"CODE{province_id}"
-    )
+@router.get("/provinces/{province_id}", response_model=schema_location.province_schema)
+async def get_province(province_id: int) -> model_location.Province:
+    db_province = models.session.get(model_location.Province, province_id)
+    if not db_province:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Province with ID {province_id} not found",
+        )
+    return db_province
 
 
-@router.post("/provinces", response_model=province_schema)
-async def create_province(province: province_schema):
-    return province
+@router.post("/provinces", response_model=schema_location.province_schema)
+async def create_province(
+    province: schema_location.province_schema,
+) -> model_location.Province:
+    db_province = model_location.Province(**province.model_dump())
+    models.session.add(db_province)
+    models.session.commit()
+    models.session.refresh(db_province)
+    return db_province
 
 
-@router.put("/provinces/{province_id}", response_model=province_schema)
-async def update_province(province_id: int, province: province_schema):
-    return province
+@router.put("/provinces/{province_id}", response_model=schema_location.province_schema)
+async def update_province(
+    province_id: int, province: schema_location.province_schema
+) -> model_location.Province:
+    db_province = models.session.get(model_location.Province, province_id)
+    if not db_province:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Province with ID {province_id} not found",
+        )
+    for key, value in province.model_dump().items():
+        setattr(db_province, key, value)
+    models.session.add(db_province)
+    return db_province
 
 
 @router.delete("/provinces/{province_id}")
 async def delete_province(province_id: int):
+    db_province = models.session.get(model_location.Province, province_id)
+    if not db_province:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Province with ID {province_id} not found",
+        )
+    models.session.delete(db_province)
+    models.session.commit()
     return {"message": f"Province {province_id} deleted successfully."}
