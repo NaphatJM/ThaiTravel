@@ -6,15 +6,22 @@ authors = [
     {name = "NaphatJM",email = "naphatjm.work@gmail.com"}
 ]
 readme = "README.md"
+packages = [{ include = "ttt" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.116.0,<0.117.0)",
     "fastapi-cli (>=0.0.8,<0.0.9)",
     "sqlmodel (>=0.0.24,<0.0.25)",
-    "pydantic[email] (>=2.11.7,<3.0.0)"
+    "pydantic[email] (>=2.11.7,<3.0.0)",
+    "aiosqlite (>=0.21.0,<0.22.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+httpx = "^0.28.1"
+
