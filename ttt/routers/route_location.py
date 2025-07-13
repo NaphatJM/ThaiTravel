@@ -18,7 +18,7 @@ async def get_provinces(session: AsyncSession = Depends(models.get_session)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No provinces found"
         )
-    return schema_location.province_schema.model_validate_list(db_provinces)
+    return [schema_location.province_schema.model_validate(p) for p in db_provinces]
 
 
 @router.get("/provinces/{province_id}", response_model=schema_location.province_schema)

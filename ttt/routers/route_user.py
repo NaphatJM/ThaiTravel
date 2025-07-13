@@ -21,7 +21,7 @@ async def get_users(session: AsyncSession = Depends(models.get_session)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No users found"
         )
-    return schema_user.User_schema.model_validate_list(db_users)
+    return [schema_user.User_schema.model_validate(u) for u in db_users]
 
 
 @router.get(

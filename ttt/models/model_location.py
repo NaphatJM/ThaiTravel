@@ -11,9 +11,7 @@ class Province(SQLModel, table=True):
     name: str
     code: str
     activities: list["Activity"] = Relationship(back_populates="province")
-    tax_reductions: Optional["TaxReduction"] = Relationship(
-        back_populates="province", sa_relationship_kwargs={"uselist": False}
-    )
+    tax_reductions: list["TaxReduction"] = Relationship(back_populates="province")
 
 
 class TaxReduction(SQLModel, table=True):
@@ -21,4 +19,4 @@ class TaxReduction(SQLModel, table=True):
     province_id: int | None = Field(default=None, foreign_key="province.id")
     tax_discount_percent: float
 
-    province: "Province" = Relationship(back_populates="tax_reductions")
+    province: Province = Relationship(back_populates="tax_reductions")

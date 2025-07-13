@@ -19,7 +19,9 @@ async def get_tax_reductions(session: AsyncSession = Depends(models.get_session)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No tax reductions found"
         )
-    return schema_location.taxReduction_schema.model_validate_list(db_tax_reductions)
+    return [
+        schema_location.taxReduction_schema.model_validate(t) for t in db_tax_reductions
+    ]
 
 
 @router.get("/{tax_reduction_id}", response_model=schema_location.taxReduction_schema)
