@@ -2,14 +2,12 @@ from pydantic import BaseModel, ConfigDict
 
 
 class province_schema(BaseModel):
-    id: int
     name: str
     code: str
     model_config = ConfigDict(from_attributes=True)
 
 
 class taxReduction_schema(BaseModel):
-    id: int
     province_id: int
     tax_discount_percent: float
     model_config = ConfigDict(from_attributes=True)

@@ -19,7 +19,7 @@ async def get_provinces():
     return db_provinces
 
 
-@router.get("/provinces/{province_id}", response_model=schema_location.province_schema)
+@router.get("/provinces/{province_id}")
 async def get_province(province_id: int) -> model_location.Province:
     db_province = models.session.get(model_location.Province, province_id)
     if not db_province:
@@ -30,9 +30,9 @@ async def get_province(province_id: int) -> model_location.Province:
     return db_province
 
 
-@router.post("/provinces", response_model=schema_location.province_schema)
+@router.post("/provinces")
 async def create_province(
-    province: schema_location.province_schema,
+    province: schema_location.province_create_schema,
 ) -> model_location.Province:
     db_province = model_location.Province(**province.model_dump())
     models.session.add(db_province)
@@ -41,9 +41,9 @@ async def create_province(
     return db_province
 
 
-@router.put("/provinces/{province_id}", response_model=schema_location.province_schema)
+@router.put("/provinces/{province_id}")
 async def update_province(
-    province_id: int, province: schema_location.province_schema
+    province_id: int, province: schema_location.province_update_schema
 ) -> model_location.Province:
     db_province = models.session.get(model_location.Province, province_id)
     if not db_province:
@@ -51,9 +51,12 @@ async def update_province(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Province with ID {province_id} not found",
         )
-    for key, value in province.model_dump().items():
+    update_data = province.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_province, key, value)
     models.session.add(db_province)
+    models.session.commit()
+    models.session.refresh(db_province)
     return db_province
 
 

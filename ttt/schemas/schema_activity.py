@@ -3,10 +3,9 @@ import decimal
 
 
 class Activity_schema(BaseModel):
-    id: int
     user_id: int
     description: str
-    location: str
+    province_id: int
     amount: decimal.Decimal
     tax_return: decimal.Decimal | None = None
 
@@ -20,7 +19,7 @@ class Activity_create_schema(Activity_schema):
 class Activity_update_schema(Activity_schema):
     user_id: int | None = None
     description: str | None = None
-    location: str | None = None
+    province_id: int | None = None
     amount: decimal.Decimal | None = None
     tax_return: decimal.Decimal | None = None
 

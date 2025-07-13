@@ -33,7 +33,7 @@ async def get_tax_reduction(tax_reduction_id: int) -> model_location.TaxReductio
 
 @router.post("/")
 async def create_tax_reduction(
-    tax_reduction: schema_location.taxReduction_schema,
+    tax_reduction: schema_location.taxReduction_create_schema,
 ) -> model_location.TaxReduction:
     db_tax_reduction = model_location.TaxReduction(**tax_reduction.model_dump())
     models.session.add(db_tax_reduction)
@@ -44,7 +44,7 @@ async def create_tax_reduction(
 
 @router.put("/{tax_reduction_id}")
 async def update_tax_reduction(
-    tax_reduction_id: int, tax_reduction: schema_location.taxReduction_schema
+    tax_reduction_id: int, tax_reduction: schema_location.taxReduction_update_schema
 ):
     db_tax_reduction = models.session.get(model_location.TaxReduction, tax_reduction_id)
     if not db_tax_reduction:

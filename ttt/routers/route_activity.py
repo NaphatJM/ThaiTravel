@@ -19,7 +19,7 @@ async def get_activities():
     return db_activities
 
 
-@router.get("/{activity_id}", response_model=schema_activity.Activity_schema)
+@router.get("/{activity_id}")
 async def get_activity(activity_id: int) -> model_activity.Activity:
     statement = select(model_activity.Activity).where(
         model_activity.Activity.id == activity_id
@@ -34,9 +34,9 @@ async def get_activity(activity_id: int) -> model_activity.Activity:
     return db_activity
 
 
-@router.post("/", response_model=schema_activity.Activity_schema)
+@router.post("/")
 async def create_activity(
-    activity: schema_activity.Activity_schema,
+    activity: schema_activity.Activity_create_schema,
 ) -> model_activity.Activity:
     db_activity = model_activity.Activity(**activity.model_dump())
     models.session.add(db_activity)
@@ -45,9 +45,9 @@ async def create_activity(
     return db_activity
 
 
-@router.put("/{activity_id}", response_model=schema_activity.Activity_schema)
+@router.put("/{activity_id}")
 async def update_activity(
-    activity_id: int, activity: schema_activity.Activity_schema
+    activity_id: int, activity: schema_activity.Activity_update_schema
 ) -> model_activity.Activity:
     statement = select(model_activity.Activity).where(
         model_activity.Activity.id == activity_id
@@ -59,7 +59,8 @@ async def update_activity(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Activity with ID {activity_id} not found",
         )
-    for key, value in activity.items():
+    update_activity = activity.model_dump(exclude_unset=True)
+    for key, value in update_activity.items():
         setattr(db_activity, key, value)
     models.session.add(db_activity)
     models.session.commit()

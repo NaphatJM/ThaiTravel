@@ -2,7 +2,6 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 class User_schema(BaseModel):
-    id: int
     full_name: str
     citizen_id: str
     email: EmailStr
